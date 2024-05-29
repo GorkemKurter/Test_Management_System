@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana sayfa</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .header {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 16px;
+        }
+        .header h1, .header h3 {
+            margin: 0;
+        }
+        .header h1 {
+            font-size: 20px;
+        }
+        .header h3 {
+            font-size: 16px;
+        }
+        .menu-bar {
+            background-color: red;
+            color: white;
+            padding: 10px 0;
+            margin-top: 50px;
+            width: 100%;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            text-align: center;
+        }
+        .menu-bar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .menu-bar li {
+            display: inline-block;
+            position: relative;
+        }
+        .menu-bar a, .menu-bar span {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+        }
+        .menu-bar li:hover > a, .menu-bar li:hover > span {
+            background-color: darkred;
+        }
+        .menu-bar ul ul {
+            display: none;
+            position: absolute;
+            background-color: red;
+            top: 100%;
+            left: 0;
+            width: 200px;
+            text-align: left;
+        }
+        .menu-bar ul ul li {
+            display: block;
+        }
+        .menu-bar li:hover > ul {
+            display: block;
+        }
+    </style>
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            timeElement.innerHTML = now.toLocaleString();
+        }
+
+        setInterval(updateTime, 1000);
+    </script>
+</head>
+<body onload="updateTime()">
+    <div class="header">
+        <h1>Hoşgeldiniz, {{ request.user.username }}!</h1>
+        <h3 id="current-time">{{ current_time }}</h3>
+    </div>
+    <div class="menu-bar">
+        <ul>
+            <li>
+                <span>Testler</span>
+                <ul>
+                    <li><a href="{% url 'testrequests' %}">Test Talebi Oluştur</a></li>
+                    <li><a href="{% url 'tests' %}">Test Takvimi</a></li> <!-- tests URL'sine yönlendirme -->
+                    <li><a href="{% url 'home/testrequestslist/' %}">Test Talepleri</a></li> <!-- tests URL'sine yönlendirme -->
+                </ul>
+            </li>
+            <li><a href="#">CB Raporu</a></li>
+            <li><a href="#">Komponent Test Gereklilikleri</a></li>
+            <li><a href="#">Projeler</a></li>
+        </ul>
+    </div>
+</body>
+</html>

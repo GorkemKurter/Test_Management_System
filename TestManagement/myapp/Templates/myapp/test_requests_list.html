@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Talepleri</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .table {
+            margin-top: 20px;
+        }
+        .filter-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px; /* Formun altında boşluk bırak */
+        }
+        .filter-form .btn-primary {
+            margin-top: 8px; /* Butonların hizalanması */
+        }
+        .alert {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <a href="/home" class="back-link">Ana sayfaya Dön</a>
+    <div class="container">
+        <div class="filter-section">
+            <div class="filter-header">Filtreleme Seçenekleri</div>
+
+            <form method="post" class="filter-form">
+                {% csrf_token %}
+                {{ filter_form.as_p }}
+                <button type="submit" name="filter_button" class="btn btn-primary">Filtrele</button>
+                <button type="submit" name="delete_button" class="btn btn-primary">Sıfırla</button>
+                {% if filter_form.non_field_errors %}
+                <div class="alert alert-danger" style="margin-top: 10px;">{{ filter_form.non_field_errors }}</div>
+                {% endif %}
+            </form>
+        </div>
+        <h2>Tüm Test Talepleri</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Talep Eden</th>
+                    <th>Tarih</th>
+                    <th>Açıklama</th>
+                    <th>Komponent</th>
+                    <th>Marka</th>
+                    <th>Model</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in full_request_datas %}
+                <tr>
+                    <td>{{ data.0 }}</td>
+                    <td>{{ data.1 }}</td>
+                    <td>{{ data.2 }}</td>
+                    <td>{{ data.3 }}</td>
+                    <td>{{ data.4 }}</td>
+                    <td>{{ data.5 }}</td>
+                    <td>
+                        <button class="btn btn-info" data-toggle="modal" data-target="#detailsModal"
+                            data-talep_eden="{{ data.0 }}"
+                            data-marka="{{ data.4 }}"
+                            data-model="{{ data.5 }}"
+                            data-komponent="{{ data.3 }}">
+                            Aç
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if full_request_datas|length == 0 %}
+                <tr>
+                    <td colspan="7" class="text-center">Veri bulunamadı.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Detaylar</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="detailsForm" method="post" action="{% url 'add_to_calendar' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="detailField1">Talep Eden</label>
+                            <input type="text" class="form-control" id="detailField1" name="talep_eden" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="detailField2">Talep Tarihi</label>
+                            <input type="text" class="form-control" id="detailField2" name="talep_tarihi" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="detailField3">Açıklama</label>
+                            <input type="text" class="form-control" id="detailField3" name="açıklama">
+                        </div>
+                        <div class="form-group">
+                            <label for="detailField4">Komponent</label>
+                            <input type="text" class="form-control" id="detailField4" name="komponent">
+                        </div>
+                        <div class="form-group">
+                            <label for="detailField5">Marka</label>
+                            <input type="text" class="form-control" id="detailField5" name="marka">
+                        </div>
+                        <div class="form-group">
+                            <label for="detailField6">Model</label>
+                            <input type="text" class="form-control" id="detailField6" name="model">
+                        </div>
+                        <div class="form-group">
+                            <label for="detailField8">Testin Adı</label>
+                            <input type="text" class="form-control" id="detailField8" name="testin_adı">
+                        </div>
+                        <div class="form-group">
+                            <label for="detailField7">Test Tarihi</label>
+                            <input type="date" class="form-control" id="detailField7" name="test_tarihi">
+                        </div>
+                        <div class="form-group">
+                            <label for="detailField9">Test Türü</label>
+                            <select class="form-control" id="detailField9" name="test_türü">
+                                <option value="materyal">Materyal</option>
+                                <option value="elektriksel güvenlik">Elektriksel Güvenlik</option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="sonuç" value="Tamamlanmadı">
+                        <input type="hidden" name="test_raporu" value="">
+                        <button type="submit" class="btn btn-primary">Test Takvimine Ekle</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $('#detailsModal').on('show.bs.modal', function (event) {
+             var button = $(event.relatedTarget); // Button that triggered the modal
+             var talep_eden = button.data('talep_eden'); // Extract info from data-* attributes
+             var marka = button.data('marka');
+             var model = button.data('model');
+             var komponent = button.data('komponent');
+             var modal = $(this);
+
+            // AJAX call to get details
+            $.ajax({
+                url: '{% url "get_test_details" %}', // URL to your view
+                data: {
+                        'talep_eden': talep_eden,
+                        'marka': marka,
+                        'model': model,
+                        'komponent': komponent
+                },
+                success: function (data) {
+                    modal.find('#detailField1').val(data.talep_eden);
+                    modal.find('#detailField2').val(data.talep_tarihi);
+                    modal.find('#detailField3').val(data.açıklama);
+                    modal.find('#detailField4').val(data.komponent);
+                    modal.find('#detailField5').val(data.marka);
+                    modal.find('#detailField6').val(data.model);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

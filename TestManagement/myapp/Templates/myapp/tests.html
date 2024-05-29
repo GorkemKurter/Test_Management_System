@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Takvimi</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .left-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 25%; /* Boyutu biraz küçültüldü */
+        }
+        .right-container {
+            position: absolute;
+            top: 120px; /* Tablonun başlığı biraz aşağıya kaydırıldı */
+            left: 20%; /* Tablonun biraz sola kaydırılması */
+            width: 70%;
+        }
+        .form-group {
+            margin-top: 30px; /* "Test Türü" başlığı biraz aşağıya kaydırıldı */
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 18px; /* Font boyutunu küçült */
+            font-weight: normal; /* Kalınlığını normal yap */
+            text-align: left; /* Başlığı sola hizala */
+        }
+        .filter-heading {
+            font-weight: bold; /* Başlığı kalınlaştır */
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px; /* Başlığın altında boşluk bırak */
+        }
+        .filter-heading span {
+            font-size: 14px;
+            color: red;
+            margin-left: 10px; /* Uyarı mesajı için boşluk bırak */
+            display: none; /* Başlangıçta gizli */
+        }
+        table {
+            margin-top: 20px; /* Tablonun biraz daha aşağıya kaydırılması */
+            width: 100%; /* Genişliği %100 yap */
+            font-size: 14px; /* Tablo font boyutunu küçült */
+        }
+        .logo img {
+            max-width: 100%; /* Logonun genişliği kapsayıcıya göre ayarlanır */
+        }
+        .datetime, .back-link {
+            font-size: 16px;
+            display: block;
+            margin-top: 10px;
+        }
+        .back-link {
+            text-decoration: none;
+            color: blue;
+        }
+        select {
+            padding: 10px;
+            font-size: 14px;
+            vertical-align: middle;
+            width: 100%; /* Genişliği %100 yap */
+            max-width: 150px; /* Maksimum genişlik */
+        }
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px; /* Formun altında boşluk bırak */
+        }
+        .filter-form .form-group {
+            flex: 1 1 150px; /* Her bir form grubuna minimum genişlik ver */
+            margin-bottom: 0;
+        }
+        .filter-form .form-control {
+            width: 100%;
+            max-width: 150px; /* Giriş alanlarının genişliğini küçült */
+        }
+        .filter-form button {
+            flex: 0 1 auto;
+            margin-left: 10px;
+        }
+    </style>
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            timeElement.innerHTML = now.toLocaleString();
+        }
+
+        function validateForm(event) {
+            const formFields = document.querySelectorAll('.filter-form .form-control');
+            let isValid = false;
+
+            formFields.forEach(field => {
+                if (field.value.trim() !== "") {
+                    isValid = true;
+                }
+            });
+
+            if (!isValid) {
+                event.preventDefault();
+                document.getElementById('validation-message').style.display = 'block';
+            } else {
+                document.getElementById('validation-message').style.display = 'none';
+            }
+        }
+
+        setInterval(updateTime, 1000);
+    </script>
+</head>
+<body onload="updateTime()">
+    <div class="left-container">
+        <div class="logo">
+            <!-- Buraya logo eklenebilir -->
+            <img src="logo.png" alt="Logo">
+        </div>
+        <div class="datetime" id="current-time"></div>
+        <a href="/home" class="back-link">Ana sayfaya Dön</a>
+        <div class="form-group">
+            <h2>Test Türü:</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" name="apply_button">Seç</button>
+            </form>
+        </div>
+    </div>
+    <div class="right-container">
+        <div class="filter-heading">
+
+            <h2>Filtreleme Seçenekleri</h2>
+            <span id="validation-message">En az bir alanın doldurulması gerekiyor</span>
+        </div>
+        <form method="post" class="filter-form" onsubmit="validateForm(event)">
+            {% csrf_token %}
+            {{ filter_form.as_p }}
+            <button type="submit" name="filter_button">Filtrele</button>
+            <button type="submit" name="delete_button">Sıfırla</button>
+        </form>
+        <h2>{{ table_header }}</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Talep Tarihi</th>
+                    <th>Test Tarihi</th>
+                    <th>Talep Eden</th>
+                    <th>Testin Adı</th>
+                    <th>Komponent</th>
+                    <th>Marka</th>
+                    <th>Model</th>
+                    <th>Açıklama</th>
+                    <th>Sonuç</th>
+                    <th>Test Raporu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in test_datas %}
+                <tr>
+                    <td>{{ test.4 }}</td>
+                    <td>{{ test.5 }}</td>
+                    <td>{{ test.0 }}</td>
+                    <td>{{ test.2 }}</td>
+                    <td>{{ test.1 }}</td>
+                    <td>{{ test.7 }}</td>
+                    <td>{{ test.8 }}</td>
+                    <td>{{ test.9 }}</td>
+                    <td>{{ test.3 }}</td>
+                    <td>{{ test.6 }}</td>
+                    <td>
+                        <button class="btn btn-info" data-toggle="modal" data-target="#detailsModal" data-id="{{ test.0 }}">Aç</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
