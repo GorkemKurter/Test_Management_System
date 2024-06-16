@@ -15,42 +15,42 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            width: 25%; /* Boyutu biraz küçültüldü */
+            width: 25%;
         }
         .right-container {
             position: absolute;
-            top: 120px; /* Tablonun başlığı biraz aşağıya kaydırıldı */
-            left: 20%; /* Tablonun biraz sola kaydırılması */
+            top: 120px;
+            left: 20%;
             width: 70%;
         }
         .form-group {
-            margin-top: 30px; /* "Test Türü" başlığı biraz aşağıya kaydırıldı */
+            margin-top: 30px;
             margin-bottom: 20px;
         }
         h2 {
-            font-size: 18px; /* Font boyutunu küçült */
-            font-weight: normal; /* Kalınlığını normal yap */
-            text-align: left; /* Başlığı sola hizala */
+            font-size: 18px;
+            font-weight: normal;
+            text-align: left;
         }
         .filter-heading {
-            font-weight: bold; /* Başlığı kalınlaştır */
+            font-weight: bold;
             display: flex;
             align-items: center;
-            margin-bottom: 10px; /* Başlığın altında boşluk bırak */
+            margin-bottom: 10px;
         }
         .filter-heading span {
             font-size: 14px;
             color: red;
-            margin-left: 10px; /* Uyarı mesajı için boşluk bırak */
-            display: none; /* Başlangıçta gizli */
+            margin-left: 10px;
+            display: none;
         }
         table {
-            margin-top: 20px; /* Tablonun biraz daha aşağıya kaydırılması */
-            width: 100%; /* Genişliği %100 yap */
-            font-size: 14px; /* Tablo font boyutunu küçült */
+            margin-top: 20px;
+            width: 100%;
+            font-size: 14px;
         }
         .logo img {
-            max-width: 100%; /* Logonun genişliği kapsayıcıya göre ayarlanır */
+            max-width: 100%;
         }
         .datetime, .back-link {
             font-size: 16px;
@@ -65,23 +65,23 @@
             padding: 10px;
             font-size: 14px;
             vertical-align: middle;
-            width: 100%; /* Genişliği %100 yap */
-            max-width: 150px; /* Maksimum genişlik */
+            width: 100%;
+            max-width: 150px;
         }
         .filter-form {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             align-items: center;
-            margin-bottom: 20px; /* Formun altında boşluk bırak */
+            margin-bottom: 20px;
         }
         .filter-form .form-group {
-            flex: 1 1 150px; /* Her bir form grubuna minimum genişlik ver */
+            flex: 1 1 150px;
             margin-bottom: 0;
         }
         .filter-form .form-control {
             width: 100%;
-            max-width: 150px; /* Giriş alanlarının genişliğini küçült */
+            max-width: 150px;
         }
         .filter-form button {
             flex: 0 1 auto;
@@ -114,12 +114,38 @@
         }
 
         setInterval(updateTime, 1000);
+
+        $(document).ready(function() {
+            $('#detailsModal').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget);
+                var testid = button.data('testid');
+                var modal = $(this);
+
+                $.ajax({
+                    url: '{% url "get_test_calendar_details" %}',
+                    data: {
+                        'test_ID': testid
+                    },
+                    success: function(data) {
+                        modal.find('#detailField1').val(data.talep_eden);
+                        modal.find('#detailField2').val(data.talep_tarihi);
+                        modal.find('#detailField3').val(data.açıklama);
+                        modal.find('#detailField4').val(data.komponentin_adı);
+                        modal.find('#detailField5').val(data.marka);
+                        modal.find('#detailField6').val(data.model);
+                        modal.find('#detailField7').val(data.testin_yapılma_tarihi);
+                        modal.find('#detailField8').val(data.testin_adı);
+                        modal.find('#detailField9').val(data.sonuç);
+                        modal.find('#detailField10').val(data.test_raporu);
+                    }
+                });
+            });
+        });
     </script>
 </head>
 <body onload="updateTime()">
     <div class="left-container">
         <div class="logo">
-            <!-- Buraya logo eklenebilir -->
             <img src="logo.png" alt="Logo">
         </div>
         <div class="datetime" id="current-time"></div>
@@ -135,7 +161,6 @@
     </div>
     <div class="right-container">
         <div class="filter-heading">
-
             <h2>Filtreleme Seçenekleri</h2>
             <span id="validation-message">En az bir alanın doldurulması gerekiyor</span>
         </div>
@@ -159,6 +184,7 @@
                     <th>Açıklama</th>
                     <th>Sonuç</th>
                     <th>Test Raporu</th>
+                    <th>İşlemler</th>
                 </tr>
             </thead>
             <tbody>
@@ -175,12 +201,116 @@
                     <td>{{ test.3 }}</td>
                     <td>{{ test.6 }}</td>
                     <td>
-                        <button class="btn btn-info" data-toggle="modal" data-target="#detailsModal" data-id="{{ test.0 }}">Aç</button>
+                    <button class="btn btn-info" data-toggle="modal" data-target="#detailsModal"
+                        data-talepeden="{{ test.0 }}" data-taleptarihi="{{ test.4 }}"
+                        data-aciklama="{{ test.9 }}" data-komponent="{{ test.1 }}"
+                        data-marka="{{ test.7 }}" data-model="{{ test.8 }}"
+                        data-testtarihi="{{ test.5 }}" data-testadi="{{ test.2 }}"
+                        data-sonuc="{{ test.3 }}" data-testraporu="{{ test.6 }}">
+                        Aç
+                    </button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
+    <!-- Modal -->
+   <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">Detaylar</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="detailsForm" method="post" action="{% url 'add_to_calendar' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="detailField1">Talep Eden</label>
+                        <input type="text" class="form-control" id="detailField1" name="talep_eden" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailField2">Talep Tarihi</label>
+                        <input type="text" class="form-control" id="detailField2" name="talep_tarihi" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailField3">Açıklama</label>
+                        <input type="text" class="form-control" id="detailField3" name="açıklama" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailField4">Komponentin Adı</label>
+                        <input type="text" class="form-control" id="detailField4" name="komponentin_adı" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailField5">Marka</label>
+                        <input type="text" class="form-control" id="detailField5" name="marka" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailField6">Model</label>
+                        <input type="text" class="form-control" id="detailField6" name="model" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailField7">Testin Yapılma Tarihi</label>
+                        <input type="text" class="form-control" id="detailField7" name="testin_yapılma_tarihi" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailField8">Testin Adı</label>
+                        <input type="text" class="form-control" id="detailField8" name="testin_adı" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailField9">Sonuç</label>
+                        <input type="text" class="form-control" id="detailField9" name="sonuç" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailField10">Test Raporu</label>
+                        <input type="text" class="form-control" id="detailField10" name="test_raporu" readonly>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Takvime Ekle</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#detailsModal').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget);
+                var modal = $(this);
+
+                var talepEden = button.data('talepeden');
+                var talepTarihi = button.data('taleptarihi');
+                var aciklama = button.data('aciklama');
+                var komponent = button.data('komponent');
+                var marka = button.data('marka');
+                var model = button.data('model');
+                var testTarihi = button.data('testtarihi');
+                var testAdi = button.data('testadi');
+                var sonuc = button.data('sonuc');
+                var testRaporu = button.data('testraporu');
+
+                modal.find('#detailField1').val(talepEden);
+                modal.find('#detailField2').val(talepTarihi);
+                modal.find('#detailField3').val(aciklama);
+                modal.find('#detailField4').val(komponent);
+                modal.find('#detailField5').val(marka);
+                modal.find('#detailField6').val(model);
+                modal.find('#detailField7').val(testTarihi);
+                modal.find('#detailField8').val(testAdi);
+                modal.find('#detailField9').val(sonuc);
+                modal.find('#detailField10').val(testRaporu);
+            });
+        });
+    </script>
 </body>
 </html>

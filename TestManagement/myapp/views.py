@@ -143,7 +143,7 @@ def tests_view(request):
                     WHERE Talep_Eden LIKE ? COLLATE NOCASE
                     AND Komponentin_Adı LIKE ? COLLATE NOCASE
                     AND Testin_Adı LIKE ? COLLATE NOCASE
-                    AND SONUÇ LIKE ? COLLATE NOCASE
+                    AND SONUÇ = ? 
                     AND Talep_Tarihi LIKE ? COLLATE NOCASE
                     AND Marka LIKE ? COLLATE NOCASE
                     AND Model LIKE ? COLLATE NOCASE
@@ -151,7 +151,7 @@ def tests_view(request):
                     '''
                     filter_parameter = (
                         f"%{requester}%", f"%{component}%", f"%{test_name}%",
-                        f"%{result}%", f"%{requested_date}%", f"%{brand}%",
+                        f"{result}", f"%{requested_date}%", f"%{brand}%",
                         f"%{model}%", f"%{explanation}%"
                     )
                     filter_cursor.execute(filter_query, filter_parameter)
@@ -176,7 +176,7 @@ def tests_view(request):
                     WHERE Talep_Eden LIKE ?
                     AND Komponentin_Adı LIKE ?
                     AND Testin_Adı LIKE ?
-                    AND SONUÇ LIKE ?
+                    AND SONUÇ = ?
                     AND Talep_Tarihi LIKE ?
                     AND Marka LIKE ?
                     AND Model LIKE ?
@@ -184,7 +184,7 @@ def tests_view(request):
                     '''
                     filter_parameter = (
                         f"%{requester}%", f"%{component}%", f"%{test_name}%",
-                        f"%{result}%", f"%{requested_date}%", f"%{brand}%",
+                        f"{result}", f"%{requested_date}%", f"%{brand}%",
                         f"%{model}%", f"%{explanation}%"
                     )
                     filter_cursor.execute(filter_query, filter_parameter)
@@ -246,17 +246,12 @@ def test_request_filter_view(request):
     return render(request, r'myapp/test_requests_list.html', {'full_request_datas': full_request_datas, 'filter_form': filter_form})
 
 def get_test_details(request):
-    talep_eden = request.GET.get('talep_eden')
-    komponent = request.GET.get('komponent')
-    marka = request.GET.get('marka')
-    model = request.GET.get('model')
+
+    request_ID = request.GET.get('regist_ID')
     conn = sqlite3.connect(r'myapp/databases/Test_Requests.db')
     cursor = conn.cursor()
     cursor.execute('''SELECT * FROM Test_Requests
-     WHERE Talep_Eden = ?
-     AND Komponent = ?
-     AND Marka = ?
-     AND Model = ?''', (talep_eden, komponent, marka, model))
+     WHERE Registration_Number = ?''', (request_ID,))
     data = cursor.fetchone()
     conn.close()
 
@@ -314,5 +309,29 @@ def add_to_calendar(request):
 
 
 def getTestCalendarDetails(request):
-    
-    pass
+
+    testid = request.GET.get('test_ID')
+    test_type = request.session.get('test_type')
+    if test_type == 'elektriksel':
+        conn = sqlite3.connect(r'myapp/databases/Electrical_tests.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM ElectricalTestLog where Registration_Number = ?', (testid,))
+        data = cursor.fetchone()
+        conn.close()
+        response_data = {
+
+                'talep_eden': data[0],
+                'komponentin_adı': data[1],
+                'testin_adı': data[2],
+                'sonuç': data[3],
+                'talep_tarihi': data[4],
+                'testin_yapılma_tarihi': data[5],
+                'test_raporu': data[6],
+                'marka': data[7],
+                'model': data[8],
+                'açıklama': data[9],
+        }
+    else:
+        response_data = []
+
+    return JsonResponse(response_data)

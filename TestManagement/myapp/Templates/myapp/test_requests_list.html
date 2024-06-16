@@ -29,13 +29,18 @@
             flex-wrap: wrap;
             gap: 10px;
             align-items: center;
-            margin-bottom: 20px; /* Formun altında boşluk bırak */
+            margin-bottom: 20px;
         }
         .filter-form .btn-primary {
-            margin-top: 8px; /* Butonların hizalanması */
+            margin-top: 8px;
         }
         .alert {
             margin-top: 20px;
+        }
+
+        /* İlgili sütunu gizlemek için */
+        td:nth-child(7), th:nth-child(7) {
+            display: none;
         }
     </style>
 </head>
@@ -44,7 +49,6 @@
     <div class="container">
         <div class="filter-section">
             <div class="filter-header">Filtreleme Seçenekleri</div>
-
             <form method="post" class="filter-form">
                 {% csrf_token %}
                 {{ filter_form.as_p }}
@@ -77,12 +81,14 @@
                     <td>{{ data.3 }}</td>
                     <td>{{ data.4 }}</td>
                     <td>{{ data.5 }}</td>
+                    <td>{{ data.6 }}</td>
                     <td>
                         <button class="btn btn-info" data-toggle="modal" data-target="#detailsModal"
                             data-talep_eden="{{ data.0 }}"
                             data-marka="{{ data.4 }}"
                             data-model="{{ data.5 }}"
-                            data-komponent="{{ data.3 }}">
+                            data-komponent="{{ data.3 }}"
+                            data-regist_id="{{ data.6 }}">
                             Aç
                         </button>
                     </td>
@@ -171,6 +177,7 @@
              var marka = button.data('marka');
              var model = button.data('model');
              var komponent = button.data('komponent');
+             var regist_id = button.data('regist_id');
              var modal = $(this);
 
             // AJAX call to get details
@@ -180,7 +187,8 @@
                         'talep_eden': talep_eden,
                         'marka': marka,
                         'model': model,
-                        'komponent': komponent
+                        'komponent': komponent,
+                        'regist_ID': regist_id
                 },
                 success: function (data) {
                     modal.find('#detailField1').val(data.talep_eden);
